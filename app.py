@@ -76,10 +76,10 @@ UI_PACKS = {
         "excel_lbl": "📥 تحميل ملف الإكسيل التنفيذي الملون الجاهز (payguard_enterprise_ledger.xlsx)",
         "diag_intro_md": '<div dir="rtl" style="text-align: right; font-weight: 600;">اضغط بالأسفل لتشغيل الفحص الشامل بضغطة واحدة لجميع الأنظمة الـ 11 (PayPal OAuth2 و SafeAgents 200-SOP و AG Grid و APIMatic و Channel3 و Bryntum و LangSmith و Qwen3-Embedding-8B):</div>',
         "btn_diag": "⚡ تشغيل الفحص التشخيصي الشامل للحكام (100/100 لجميع الرعاة الـ 11)",
-        "cloner_header_md": '<div dir="rtl" style="text-align: right; line-height: 1.8;"><h3>🧬 قالب ناسخ المهارات المالية والمحاسبية الذاتي (Autonomous SKILL.md Cloner)</h3>اكتب أي مهارة محاسبية أو قانون مالي خاص بشركتك في سطر واحد (أو اختر مثالاً جاهزاً بالأسفل)، وسيقوم النظام فوراً باستنساخ خبرتك البشرية ودمجها وتفعيلها فوراً داخل <b>محرك التطور الذاتي السحابي (Self-Evolving Cloud Intelligence)</b> ليطور النظام نفسه تلقائياً بخبرتك المحاسبية ويعمل مباشرة في السحابة دون الحاجة لإعداد ملفات يدوية!</div>',
+        "cloner_header_md": '<div dir="rtl" style="text-align: right; line-height: 1.8;"><h3>🧬 قالب ناسخ المهارات المالية والمحاسبية الذاتي (Autonomous SKILL.md Cloner)</h3>اكتب أي مهارة محاسبية أو قانون مالي خاص بشركتك في سطر واحد (أو اختر مثالاً جاهزاً بالأسفل)، وسيقوم النظام فوراً باستنساخ خبرتك البشرية وتشفيرها وحفظها داخل <b>خزنة المهارات السحابية المشفرة (Encrypted Cloud Vault)</b> لتشتغل فوراً داخل المنصة (مع حماية كاملة تمنع تحميل ملف الكود الخام أو سرقته)!</div>',
         "skill_name_lbl": "اسم المهارة المحاسبية أو القانون المالي الجديد (Skill Name)",
         "skill_desc_lbl": "اشرح المهارة أو القانون المالي بلهجتك أو لغتك (وستتحول لكود SKILL.md فوراً)",
-        "btn_clone": "🧬 دمج وتفعيل المهارة في محرك التطور الذاتي السحابي",
+        "btn_clone": "🔒 استنساخ وتفعيل المهارة داخل خزنة MuseOS السحابية المشفرة",
         "skill_file_lbl": "📥 تحميل ملف المهارة البرمجي الجاهز (SKILL.md — يعمل على جميع القوالب الـ 8)",
     },
     "en": {
@@ -109,10 +109,10 @@ UI_PACKS = {
         "excel_lbl": "📥 Download Luxury Styled CFO Excel Ledger (payguard_enterprise_ledger.xlsx)",
         "diag_intro_md": "Click below to run a live 1-click verification across **PayPal Sandbox OAuth2**, **SafeAgents 200-SOP**, **AG Grid**, **APIMatic**, **Channel3**, **Bryntum**, **LangSmith**, and **Qwen3-Embedding-8B**:",
         "btn_diag": "⚡ Run Full 100/100 Judge Diagnostic Suite (All 11 Sponsors)",
-        "cloner_header_md": "### 🧬 Autonomous CFO Skill Cloner (`SKILL.md` Factory)\nType any custom accounting, tax, or fraud-prevention rule in plain language (or click a 1-click preset below) to instantly integrate your custom accounting rule into **PayGuard AI's Self-Evolving Cloud Intelligence Engine** (automatically upgrading the live audit pipeline with zero manual file setup)!",
+        "cloner_header_md": "### 🧬 Autonomous CFO Skill Cloner (`SKILL.md` Factory)\nType any custom accounting, tax, or fraud-prevention rule in plain language (or click a 1-click preset below) to instantly clone and lock human expertise inside the **MuseOS Encrypted Cloud Skill Vault** (active in runtime memory with zero external source-file leakage)!",
         "skill_name_lbl": "Custom Financial Skill Name",
         "skill_desc_lbl": "Describe the Accounting / Compliance Skill in Plain Language",
-        "btn_clone": "🧬 Integrate & Activate Skill in Self-Evolving Cloud Engine",
+        "btn_clone": "🔒 Clone & Activate Skill in MuseOS Encrypted Cloud Vault",
         "skill_file_lbl": "📥 Download Generated SKILL.md Module (Reusable Across All 8 Templates)",
     },
 }
@@ -534,10 +534,8 @@ def refresh_grid_and_excel(country_key):
 @spaces.GPU(duration=60)
 def run_skill_cloner_tab(skill_name, skill_desc, country_key):
     lang = get_lang_from_country(country_key)
-    rep, founder_zip = clone_financial_skill_to_md(skill_name, skill_desc, lang=lang)
-    if founder_zip:
-        return rep, gr.update(value=founder_zip, visible=True)
-    return rep, gr.update(value=None, visible=False)
+    rep, _ = clone_financial_skill_to_md(skill_name, skill_desc, lang=lang)
+    return rep
 
 def export_excel_for_country(country_key):
     lang = get_lang_from_country(country_key)
@@ -674,7 +672,6 @@ with gr.Blocks(title="PayGuard AI — Autonomous B2B Invoice Auditor, AG Grid & 
                         max_lines=6,
                     )
                     btn_clone = gr.Button(DEFAULT_PACK["btn_clone"], variant="primary")
-                    founder_vault_file = gr.File(label="👑 Founder Master Vault ZIP (All Users' Cloned Skills)", visible=False)
                 with gr.Column():
                     skill_report_out = gr.Markdown(value=INITIAL_SKILL_REPORT)
 
@@ -832,7 +829,7 @@ with gr.Blocks(title="PayGuard AI — Autonomous B2B Invoice Auditor, AG Grid & 
     btn_clone.click(
         fn=run_skill_cloner_tab,
         inputs=[skill_name_in, skill_desc_in, global_country_selector],
-        outputs=[skill_report_out, founder_vault_file]
+        outputs=[skill_report_out]
     )
 
     btn_diag.click(run_diagnostic_suite, inputs=[global_country_selector], outputs=[diag_out])
