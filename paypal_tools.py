@@ -42,7 +42,7 @@ def get_paypal_oauth2_token():
             auth=(PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET),
             data={"grant_type": "client_credentials"},
             headers={"Accept": "application/json", "Accept-Language": "en_US"},
-            timeout=10
+            timeout=2.5
         )
         if res.status_code == 200:
             return res.json().get("access_token"), "PayPal Live Sandbox OAuth2 Connected"
@@ -170,7 +170,7 @@ def execute_paypal_sandbox_order(invoice_number, vendor_name, amount_usd, curren
                 "Content-Type": "application/json",
                 "PayPal-Request-Id": f"payguard-{invoice_number}-{uuid.uuid4().hex[:8]}"
             }
-            res = requests.post(url, json=payload, headers=headers, timeout=12)
+            res = requests.post(url, json=payload, headers=headers, timeout=2.5)
             if res.status_code in (200, 201):
                 data = res.json()
                 return data.get("id", "PAYPAL-LIVE-SBX"), data.get("status", "CREATED"), auth_mode
@@ -196,11 +196,18 @@ def verify_market_price_tavily(items_summary):
                 "include_answer": True,
                 "max_results": 2
             },
-            timeout=10
+            timeout=2.5
         )
         if res.status_code == 200:
             ans = res.json().get("answer") or "Verified against live global B2B hardware & cloud supplier listings."
-            return f"🌐 Tavily & Channel3 Live SKU Benchmark: {ans[:260]}", 3.8
+            clean_ans = ans.strip()
+            if len(clean_ans) > 220:
+                cut = clean_ans[:220]
+                if "." in cut[120:]:
+                    clean_ans = cut[:cut.rfind(".") + 1]
+                else:
+                    clean_ans = cut.rsplit(" ", 1)[0] + "..."
+            return f"🌐 Tavily & Channel3 Live SKU Benchmark: {clean_ans}", 3.8
     except Exception:
         pass
     return "Live Market Benchmark: Fair wholesale pricing confirmed (Variance 4.0%).", 4.0
@@ -240,7 +247,7 @@ def compute_qwen3_semantic_embedding_digest(text):
                     f"{base_url}/embeddings",
                     headers={"Authorization": f"Bearer {NEBIUS_API_KEY}", "Content-Type": "application/json"},
                     json={"model": QWEN3_EMBEDDING_MODEL, "input": str(text)[:1000]},
-                    timeout=8
+                    timeout=2.2
                 )
                 if res.status_code == 200:
                     vec = res.json()["data"][0]["embedding"][:6]
